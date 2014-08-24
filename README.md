@@ -14,7 +14,7 @@ Blog: http://creativityslashdesign.tk/
 <br>
 <br>
 Description:
-Provides an demo of SPI LCD Library functionality on a display TFTM1802 (S6D02A1\ST7735), tested with the board CY8CKIT-049-42xx.
+Provides a demo of SPI LCD Library functionality on a display TFTM1802 (S6D02A1\ST7735), tested with the board CY8CKIT-049-42xx.
 <br>
 <br>
 All info on my blog.
