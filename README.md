@@ -21,7 +21,4 @@ All info on my blog.
 <br>
 <br>
 <br>
-<iframe allowfullscreen="" frameborder="0" height="217" src="//www.youtube.com/embed/BZXqcnUJl3U" width="385"></iframe>
-</div>
-<br>
 MIT License, Copyright (c) 2014.
