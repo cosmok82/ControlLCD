@@ -22,11 +22,15 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include <project.h>
 #include "ControlLCD.h"
+#include "glcdfont.c"
 #include <stdlib.h>
 #include <math.h>
 
-extern uint8_t x_start;
-extern uint8_t y_start;
+extern uint8_t x_start, y_start;
+uint8_t _width  = 0;
+uint8_t _height = 0;
+char character = ' ';
+
 const SPIM_SPI_INIT_STRUCT ConfigSPIM =
 {
     SPIM_SPI_MASTER,
@@ -226,6 +230,9 @@ void initDISPLAY(void)
     LCDData(NOP);
 	LCDCommand(DISPON);                             // Display on.
     LCDCommand(RAMWR);                              // Memory write.
+    
+    _width  = WIDTH;
+    _height = HEIGHT;
 }
 /*******************************************************/
 void setAddrWindow(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1)
@@ -256,7 +263,7 @@ void fillColor(uint32_t color)
 /*******************************************************/
 void drawPixel(uint16_t x, uint16_t y, uint32_t color)
 {
-  if((x < 0) || (x >= WIDTH) || (y < 0) || (y >= HEIGHT)) return;
+  if((x < 0) || (x >= _width) || (y < 0) || (y >= _height)) return;
  
   setAddrWindow(x,y,x+1,y+1);
   
@@ -303,11 +310,80 @@ void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint32_t color)
   }
 }
 /*******************************************************/
+void setWidth(uint8_t d)
+{
+    if (d == NULL)
+        _width = WIDTH;
+    else
+        _width = d;
+}
+/*******************************************************/
+void setHeight(uint8_t d)
+{
+    if (d == NULL)
+        _height = HEIGHT;
+    else
+        _height = d;
+}
+/*******************************************************/
+uint8_t getWidth(void)
+{
+    return _width;
+}
+/*******************************************************/
+uint8_t getHeight(void)
+{
+    return _height;
+}
+/*******************************************************/
+
+/* some definition... */
+#define MADCTL_MY  0x80
+#define MADCTL_MX  0x40
+#define MADCTL_MV  0x20
+#define MADCTL_ML  0x10
+#define MADCTL_RGB 0x00
+#define MADCTL_BGR 0x08
+#define MADCTL_MH  0x04
+
+/* Set Display rotation. */
+void RotSetting(uint8_t m)
+{
+  LCDCommand(MADCTL);
+  uint8_t rotation = m % 4; // can't be higher than 3
+  switch (rotation)
+  { 
+    case 0: // portrait 0°
+    LCDData(MADCTL_BGR);
+    _width  = WIDTH;
+    _height = HEIGHT;
+    break;
+    
+    case 1: // landscape 90°
+    LCDData(MADCTL_MX | MADCTL_MV | MADCTL_BGR);
+    _width  = HEIGHT;
+    _height = WIDTH;
+    break;
+    
+    case 2: // portrait 180°
+    LCDData(MADCTL_MX | MADCTL_MY | MADCTL_BGR);
+    _width  = WIDTH;
+    _height = HEIGHT;
+    break;
+    
+    case 3: // landscape 270°
+    LCDData(MADCTL_MY | MADCTL_MV | MADCTL_BGR);
+    _width  = HEIGHT;
+    _height = WIDTH;
+    break;
+  }
+}
+/*******************************************************/
 void drawFastVLine(int16_t x, int16_t y, int16_t h, uint32_t color)
 {  
   // Rudimentary clipping
-  if((x < 0) || (x >= WIDTH) || (y < 0) || (y >= HEIGHT)) return;
-  if((y+h-1) >= HEIGHT)  h = HEIGHT-y;
+  if((x < 0) || (x >= _width) || (y < 0) || (y >= _height)) return;
+  if((y+h-1) >= _height)  h = _height-y;
   
   setAddrWindow(x, y, x, y+h-1);
 
@@ -319,8 +395,8 @@ void drawFastVLine(int16_t x, int16_t y, int16_t h, uint32_t color)
 void drawFastHLine(int16_t x, int16_t y, int16_t w, uint32_t color)
 {
   // Rudimentary clipping
-  if((x < 0) || (x >= WIDTH) || (y < 0) || (y >= HEIGHT)) return;
-  if((x+w-1) >= WIDTH)  w = WIDTH-x;
+  if((x < 0) || (x >= _width) || (y < 0) || (y >= _height)) return;
+  if((x+w-1) >= _width)  w = _width-x;
   setAddrWindow(x, y, x+w-1, y);
 
   while (w--) {
@@ -346,7 +422,7 @@ void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint32_t color)
 /*******************************************************/
 void fillScreen(uint32_t color)
 {
-  fillRect(0, 0,  WIDTH, HEIGHT, color);
+  fillRect(0, 0, _width, _height, color);
 }
 /*******************************************************/
 void lcdTest(void)
@@ -425,7 +501,8 @@ void drawCircleHelper( int16_t x0, int16_t y0, int16_t r, uint8_t cornername, ui
   }
 }
 /*******************************************************/
-// Used to do circles and roundrects
+
+/* Used to do circles and roundrects. */
 void fillCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, int16_t delta, uint32_t color)
 {
   int16_t f     = 1 - r;
@@ -461,7 +538,8 @@ void fillCircle(int16_t x0, int16_t y0, int16_t r, uint32_t color)
   fillCircleHelper(x0, y0, r, 3, 0, color);
 }
 /*******************************************************/
-// Fill a rounded rectangle
+
+/* Fill a rounded rectangle. */
 void fillRoundRect(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint32_t color)
 {
   // smarter version
@@ -470,4 +548,114 @@ void fillRoundRect(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint32
   // draw four corners
   fillCircleHelper(x+w-r-1, y+r, r, 1, h-2*r-1, color);
   fillCircleHelper(x+r    , y+r, r, 2, h-2*r-1, color);
+}
+/*******************************************************/
+char* toChar(uint8_t d)
+{
+    character = (char)(d+48);
+    if(d < 10) return &character;
+    return 0;
+}
+/*******************************************************/
+void drawChar(int16_t x, int16_t y, unsigned char c, uint32_t color, uint16_t bg, uint8_t size)
+{
+  if((x >= _width)            || // Clip right
+    (y  >= _height)           || // Clip bottom
+    ((x + 6 * size - 1) < 0)  || // Clip left
+    ((y + 8 * size - 1) < 0))    // Clip top
+    return;
+
+  int8_t i;
+
+  for (i = 0; i < 6; i++ ) {
+    uint8_t line;
+    if (i == 5) 
+      line = 0x0;
+    else 
+      line = font[c*5+i];
+    int8_t j;
+    for (j = 0; j < 8; j++) {
+      if (line & 0x1) {
+        if (size == 1)          // default size
+          drawPixel(x+i, y+j, color);
+        else {                  // big size
+          fillRect(x+(i*size), y+(j*size), size, size, color);
+        } 
+      } else if (bg != color) {
+        if (size == 1)          // default size
+          drawPixel(x+i, y+j, bg);
+        else {                  // big size
+          fillRect(x+i*size, y+j*size, size, size, bg);
+        }
+      }
+      line >>= 1;
+    }
+  }
+}
+/*******************************************************/
+void print(char* text, uint32_t color, uint16_t bg, uint8_t size)
+{
+    uint8_t i, j, nChar;
+    i = j = 0;
+    nChar = ' ';
+    
+    for(j = 0; j < strlen(text); j++)
+    {
+        if (text[j] == '\n')
+        {
+            j++;
+            i = x_start = 0;    // x reset
+            y_start += size*8;  // new line
+        }
+        else if (text[j] == '\r')
+        {
+            // skip em
+        }
+        
+        if (_height == HEIGHT)
+            nChar = 21;
+        else if (_height == WIDTH)
+            nChar = 26;
+        
+        if (i == nChar)
+        {
+            i = x_start = 0;
+            y_start += size*8; // new line
+        }
+        
+        x_start = i+5*i*size;
+        drawChar(0, 0, text[j], color, bg, size);    
+        i++;
+    }
+    x_start = 0;
+    y_start = 0;
+}
+/*******************************************************/
+void printN(char* textTwo, uint32_t color, uint16_t bg, uint8_t size, uint8_t num)
+{
+    char tempNum[1];
+    char tempText[strlen(textTwo)];
+    
+    uint8_t c = num/100;
+    uint8_t d = num/10 - c*10;
+    uint8_t u = num - c*100 - d*10;
+
+    if ((num >= 100)&&(num <= 255))
+    {
+        strncat(tempNum, toChar(c), 1);
+        strncat(tempNum, toChar(d), 1);
+        strncat(tempNum, toChar(u), 1);
+    }
+    else if ((num >= 10)&&(num < 100))
+    {
+        strncat(tempNum, toChar(d), 1);
+        strncat(tempNum, toChar(u), 1);
+    }
+    else
+    strncat(tempNum, toChar(u), 1);
+
+    strcpy(tempText, textTwo);
+    
+    strncat(tempText, tempNum, strlen(tempNum));
+    print(tempText, color, bg, size);
 }
