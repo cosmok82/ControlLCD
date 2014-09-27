@@ -27,7 +27,7 @@ Added:
 * uint8_t getWidth(void)
 * uint8_t getHeight(void)
 * void RotSetting(uint8_t m)
-	(!) it sets the display rotation from 0° to 270° degrees
+	(!) it sets the display rotation from 0Â° to 270Â° degrees
 * char* toChar(uint8_t d)
 	(!) it converts a number from 0 to 9 in a char
 * void drawChar(int16_t x, int16_t y, unsigned char c, uint32_t color, uint16_t bg, uint8_t size)
@@ -36,6 +36,8 @@ Added:
 	(!) it prints a formatted text in according to screen size
 * void printN(char* text, uint32_t color, uint16_t bg, uint8_t size, uint8_t num)
 	(!) it appends to text a number and prints out everything
+<br>
+<br>
 <br>
 All info on my blog.
 <br>
