@@ -4,8 +4,8 @@ ControlLCD
 TFTM1802 SPI Display Library for CY8CKIT-049-42xx
 
 <div style="text-align: center;">
-<a href="http://3.bp.blogspot.com/-NKO-7JuCFo4/U_nTT84kACI/AAAAAAAAEHA/nCHZ5gU6J5Y/s1600/cover.jpg">
-<img alt="img" src="http://3.bp.blogspot.com/-NKO-7JuCFo4/U_nTT84kACI/AAAAAAAAEHA/nCHZ5gU6J5Y/s1600/cover.jpg">
+<a href="http://2.bp.blogspot.com/-K08HbNVVSmQ/VCcOdibDroI/AAAAAAAAERs/-ZOpl-JKNWI/s1600/cover1.1.jpg">
+<img alt="img" src="http://2.bp.blogspot.com/-K08HbNVVSmQ/VCcOdibDroI/AAAAAAAAERs/-ZOpl-JKNWI/s1600/cover1.1.jpg">
 </a>
 </div>
 <br>
@@ -21,7 +21,7 @@ CHANGELOG (notable new features or fixes)
 
 ### Beta 1.1
 Added:
-* Add Adafruit font library (Thanks to Adafruit GFX :D )
+* Adds Adafruit font library (Thanks to Adafruit GFX :D )
 * void setWidth(uint8_t d)
 * void setHeight(uint8_t d)
 * uint8_t getWidth(void)
@@ -35,7 +35,7 @@ Added:
 * void print(char* text, uint32_t color, uint16_t bg, uint8_t size)
 <br> (!) it prints a formatted text in according to screen size
 * void printN(char* text, uint32_t color, uint16_t bg, uint8_t size, uint8_t num)
-<br> (!) it appends to text a number and prints out everything
+<br> (!) it appends a number to the text and print out everything
 <br>
 <br>
 <br>
