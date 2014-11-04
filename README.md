@@ -9,7 +9,7 @@ TFTM1802 SPI Display Library for CY8CKIT-049-42xx
 </a>
 </div>
 <br>
-Author: Orlando Cosimo.<br>
+Author: Cosimo Orlando.<br>
 Blog: http://creativityslashdesign.tk/
 <br>
 <br>
